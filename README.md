@@ -177,6 +177,9 @@ npm run serve        # 启动 http://127.0.0.1:8777
 
 `docs/` 是插件的单页宣传网站，纯 HTML / CSS / 原生 JS，没有构建步骤和外部依赖。
 
+- **线上地址**：https://potatonb666.github.io/gitDemo/
+- **发布方式**：GitHub Pages，来源为 `main` 分支的 `/docs` 目录；`docs/.nojekyll` 保证文件原样发布。
+  修改 `docs/` 并推送到 `main` 后，Pages 会自动重新构建（约 1 分钟）。
 - **本地预览**：直接双击 `docs/index.html`，浏览器会用 `file://` 打开；也可以用
   `npx serve docs` 或任意静态服务器预览。页面中的锚点、移动端菜单、滚动动画在两种方式下都可用。
 - **修改主色**：打开 `docs/css/style.css`，改 `:root` 里的 `--primary` 与 `--primary-2`，
