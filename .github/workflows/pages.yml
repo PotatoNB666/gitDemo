@@ -1,0 +1,48 @@
+# 把 docs/ 目录下的纯静态官网发布到 GitHub Pages
+# 触发方式：推送到 main 且改动 docs/ 时自动部署，也可以在 Actions 页手动触发
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+# GitHub Pages 部署所需的最小权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只保留一次部署，新的推送会取消排队中的旧任务
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      # enablement: true 会在仓库尚未开启 Pages 时自动开启，
+      # 因此无需在仓库设置里手动选择发布源
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: 上传 docs 目录
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
