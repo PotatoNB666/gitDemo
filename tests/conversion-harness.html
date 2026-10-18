@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>Service Worker 转换逻辑测试</title>
+  </head>
+  <body>
+    <p>该页面直接 import background.js，在真实浏览器里验证 PNG 转换与下载逻辑。</p>
+
+    <script>
+      // 必须在 import background.js 之前注入扩展 API 桩
+      window.__downloadCalls = [];
+      window.__failNextBlobDownload = false;
+
+      const noop = { addListener: () => {} };
+
+      const stub = {
+        runtime: {
+          id: 'test-extension-id',
+          lastError: null,
+          getURL: (path) => new URL(`../${path}`, location.href).href,
+          onMessage: noop,
+          onInstalled: noop,
+          sendMessage: () => Promise.resolve(),
+        },
+        action: { onClicked: noop },
+        downloads: {
+          onChanged: noop,
+          download: async (options) => {
+            if (window.__failNextBlobDownload && options.url.startsWith('blob:')) {
+              window.__failNextBlobDownload = false;
+              throw new Error('blob URL is unavailable in service worker');
+            }
+            window.__downloadCalls.push(options);
+            return window.__downloadCalls.length;
+          },
+        },
+        storage: {
+          session: {
+            get: async () => ({}),
+            set: async () => {},
+            remove: async () => {},
+          },
+        },
+        tabs: { create: async () => ({ id: 1 }) },
+      };
+
+      try {
+        Object.defineProperty(window, 'chrome', { value: stub, configurable: true, writable: true });
+      } catch {
+        window.chrome = stub;
+      }
+    </script>
+
+    <script type="module" src="./conversion-harness.js"></script>
+  </body>
+</html>

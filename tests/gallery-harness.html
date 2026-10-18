@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>画廊页测试</title>
+    <link rel="stylesheet" href="../gallery.css" />
+  </head>
+  <body>
+    <script>
+      // 扩展 API 桩：模拟后台返回的提取结果与下载进度
+      (function stubChrome() {
+        const fakeGallery = {
+          id: 'test-gallery',
+          createdAt: Date.now(),
+          pageUrl: 'https://detail.tmall.com/item.htm?id=123456',
+          pageTitle: '测试商品详情页',
+          platform: '淘宝 / 天猫',
+          images: [
+            { url: new URL('fixtures/large.png', location.href).href, width: 320, height: 240 },
+            { url: new URL('fixtures/bg.png', location.href).href, width: 500, height: 400 },
+            { url: new URL('fixtures/big.png', location.href).href, width: 640, height: 480 },
+          ],
+        };
+
+        window.__fakeGallery = fakeGallery;
+        window.__sentMessages = [];
+        window.__galleryListener = null;
+
+        const stub = {
+          runtime: {
+            id: 'test-extension-id',
+            lastError: null,
+            getURL: (path) => new URL(`../${path}`, location.href).href,
+            sendMessage: (message, callback) => {
+              window.__sentMessages.push(message);
+
+              let response = { ok: false };
+              if (message?.type === 'GET_GALLERY' || message?.type === 'GET_LATEST_GALLERY') {
+                response = { ok: true, gallery: fakeGallery };
+              } else if (message?.type === 'START_DOWNLOAD') {
+                response = { ok: true, taskId: message.taskId, total: message.items.length };
+              }
+
+              if (typeof callback === 'function') setTimeout(() => callback(response), 0);
+              return Promise.resolve(response);
+            },
+            onMessage: {
+              addListener: (listener) => {
+                window.__galleryListener = listener;
+              },
+            },
+          },
+        };
+
+        try {
+          Object.defineProperty(window, 'chrome', { value: stub, configurable: true, writable: true });
+        } catch {
+          window.chrome = stub;
+        }
+      })();
+    </script>
+
+    <script type="module">
+      // 复用真实的 gallery.html 结构，避免测试页与生产页结构漂移
+      const html = await (await fetch('../gallery.html')).text();
+      const parsed = new DOMParser().parseFromString(html, 'text/html');
+      document.body.innerHTML = parsed.body.innerHTML;
+
+      await import('../gallery.js');
+      await import('./gallery-harness.js');
+    </script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>非详情页测试（按钮不应出现）</title>
+    <script>
+      (function stubChrome() {
+        const stub = {
+          runtime: {
+            id: 'test-extension-id',
+            lastError: null,
+            getURL: (path) => new URL(`../${path}`, location.href).href,
+            sendMessage: () => Promise.resolve({ ok: true }),
+            onMessage: { addListener: () => {} },
+          },
+        };
+        try {
+          Object.defineProperty(window, 'chrome', { value: stub, configurable: true, writable: true });
+        } catch {
+          window.chrome = stub;
+        }
+        // 不设置 __ECOM_IMG_FORCE__，且 127.0.0.1 不在平台白名单内
+      })();
+    </script>
+    <script src="../content.js"></script>
+  </head>
+  <body>
+    <p>该页面模拟"非商品详情页"，按钮不应出现。</p>
+    <script>
+      setTimeout(() => {
+        const host = document.querySelector('#ecom-img-extractor-host');
+        window.__blockedResult = {
+          pass: !host,
+          detail: host ? '按钮被错误注入' : '按钮未注入（符合预期）',
+        };
+      }, 2500);
+    </script>
+  </body>
+</html>

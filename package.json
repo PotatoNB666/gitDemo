@@ -1,0 +1,12 @@
+{
+  "name": "ecom-image-extractor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Chrome 扩展：电商商品图片提取与 PNG 批量下载（含开发/测试脚本）",
+  "scripts": {
+    "fixtures": "node tests/gen-fixtures.mjs",
+    "serve": "node tests/serve.mjs 8777",
+    "test": "node --test tests/*.test.mjs"
+  }
+}

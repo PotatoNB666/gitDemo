@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>Content Script 测试页</title>
+    <style>
+      body {
+        font-family: -apple-system, "Segoe UI", sans-serif;
+        margin: 0 auto;
+        padding: 24px;
+        max-width: 960px;
+        background: #fff;
+        color: #222;
+      }
+      h1 {
+        font-size: 18px;
+      }
+      .stage {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      .stage img,
+      .stage div {
+        border: 1px dashed #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Content Script 测试页（模拟商品详情页结构）</h1>
+    <p>该页面用于验证：图片收集、懒加载兼容、背景图提取、尺寸过滤、噪音过滤、URL 归一化、去重。</p>
+
+    <div class="stage">
+      <!-- 正常大图 -->
+      <img id="img-large" src="fixtures/large.png" width="320" height="240" alt="large" />
+      <!-- 同一张图重复出现，应被去重 -->
+      <img id="img-large-dup" src="fixtures/large.png" alt="large-dup" />
+      <!-- 尺寸不足 -->
+      <img id="img-tiny" src="fixtures/tiny.png" alt="tiny" />
+      <!-- 1x1 像素图 -->
+      <img id="img-dot" src="fixtures/dot.png" alt="dot" />
+      <!-- 文件名带 logo，应被噪音规则过滤 -->
+      <img id="img-logo" src="fixtures/logo.png" alt="logo" />
+      <!-- 懒加载：src 是占位图，真实地址在 data-src -->
+      <img id="img-lazy" src="fixtures/placeholder-blank.png" data-src="fixtures/lazy.png" alt="lazy" width="120" />
+      <!-- srcset：应取最大的一张 big.png -->
+      <img
+        id="img-srcset"
+        src="fixtures/small.png"
+        srcset="fixtures/small.png 120w, fixtures/big.png 640w"
+        alt="srcset"
+      />
+      <!-- 背景图：容器够大，应被提取 -->
+      <div
+        id="bg-ok"
+        style="width: 300px; height: 200px; background-image: url('fixtures/bg.png'); background-size: cover"
+      ></div>
+      <!-- 背景图：容器太小，应被过滤 -->
+      <div
+        id="bg-small"
+        style="width: 60px; height: 60px; background-image: url('fixtures/bg-small.png'); background-size: cover"
+      ></div>
+      <!-- 渐变背景：不是图片，应忽略 -->
+      <div
+        id="bg-gradient"
+        style="width: 200px; height: 150px; background-image: linear-gradient(90deg, #f00, #00f)"
+      ></div>
+    </div>
+
+    <!-- 扩展 API 桩：必须在 content.js 之前注入 -->
+    <script>
+      (function stubChrome() {
+        const stub = {
+          runtime: {
+            id: 'test-extension-id',
+            lastError: null,
+            getURL: (path) => new URL(`../${path}`, location.href).href,
+            sendMessage: (message, callback) => {
+              window.__lastMessage = message;
+              if (typeof callback === 'function') {
+                callback({ ok: true, id: 'test-gallery', count: message?.data?.images?.length || 0 });
+              }
+              return Promise.resolve({ ok: true });
+            },
+            onMessage: { addListener: () => {} },
+          },
+          storage: {
+            local: {
+              get: () => Promise.resolve({}),
+              set: () => Promise.resolve(),
+            },
+          },
+        };
+
+        // 页面环境中 window.chrome 可能已存在且不可写，做双重兜底
+        try {
+          Object.defineProperty(window, 'chrome', { value: stub, configurable: true, writable: true });
+        } catch {
+          window.chrome = stub;
+        }
+
+        window.__ECOM_IMG_FORCE__ = true;
+      })();
+    </script>
+
+    <script src="../content.js"></script>
+    <script src="./harness.js"></script>
+  </body>
+</html>

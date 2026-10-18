@@ -1,0 +1,116 @@
+/**
+ * 悬浮按钮样式
+ * 这些样式被注入到 content script 的 Shadow Root 内，
+ * 因此不会与页面自身的全局样式互相影响。
+ */
+
+.ecom-extractor {
+  --ecom-accent: #ff5a1f;
+  --ecom-accent-2: #ff2d55;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ecom-extractor__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--ecom-accent), var(--ecom-accent-2));
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(255, 61, 85, 0.35);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ecom-extractor__btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(255, 61, 85, 0.45);
+  filter: brightness(1.05);
+}
+
+.ecom-extractor__btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(255, 61, 85, 0.35);
+}
+
+.ecom-extractor__btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.ecom-extractor__btn:disabled {
+  cursor: progress;
+  opacity: 0.88;
+  filter: saturate(0.85);
+}
+
+.ecom-extractor__icon {
+  width: 17px;
+  height: 17px;
+  flex: none;
+  display: block;
+}
+
+.ecom-extractor__toast {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  max-width: 260px;
+  padding: 9px 13px;
+  border-radius: 10px;
+  background: rgba(24, 26, 32, 0.94);
+  color: #fff;
+  font-size: 12.5px;
+  line-height: 1.5;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+  animation: ecom-toast-in 0.18s ease-out;
+}
+
+.ecom-extractor__toast[hidden] {
+  display: none;
+}
+
+.ecom-extractor__toast--ok {
+  background: rgba(19, 122, 74, 0.96);
+}
+
+.ecom-extractor__toast--warn {
+  background: rgba(176, 106, 0, 0.96);
+}
+
+.ecom-extractor__toast--error {
+  background: rgba(178, 36, 36, 0.96);
+}
+
+@keyframes ecom-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ecom-extractor__btn,
+  .ecom-extractor__toast {
+    transition: none;
+    animation: none;
+  }
+}

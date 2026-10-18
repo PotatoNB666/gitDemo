@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>商品图片提取结果</title>
+    <link rel="stylesheet" href="gallery.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__title">
+        <h1>商品图片</h1>
+        <p class="meta" id="page-meta">正在加载提取结果…</p>
+      </div>
+
+      <div class="toolbar">
+        <label class="checkbox" title="全选 / 取消全选">
+          <input type="checkbox" id="select-all" />
+          <span>全选</span>
+        </label>
+        <button type="button" class="btn btn--ghost" id="invert-btn">反选</button>
+        <span class="count" id="selected-count">已选 0 / 0</span>
+        <button type="button" class="btn btn--primary" id="download-btn" disabled>下载选中</button>
+      </div>
+    </header>
+
+    <section class="progress" id="progress" hidden>
+      <div class="progress__track">
+        <div class="progress__fill" id="progress-fill"></div>
+      </div>
+      <p class="progress__text" id="progress-text"></p>
+    </section>
+
+    <div class="banner" id="banner" hidden></div>
+
+    <main class="content">
+      <div class="grid" id="grid"></div>
+
+      <div class="empty" id="empty" hidden>
+        <p class="empty__title" id="empty-title">没有找到图片</p>
+        <p class="empty__desc" id="empty-desc">
+          请回到商品详情页，点击右下角的「获取图片」按钮重新提取。
+        </p>
+        <button type="button" class="btn btn--ghost" id="latest-btn" hidden>打开最近一次提取结果</button>
+      </div>
+    </main>
+
+    <script type="module" src="gallery.js"></script>
+  </body>
+</html>

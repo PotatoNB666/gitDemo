@@ -1,0 +1,12 @@
+# 依赖与系统文件
+node_modules/
+.DS_Store
+Thumbs.db
+
+# 日志与临时文件
+*.log
+npm-debug.log*
+.cache/
+
+# 测试生成的临时产物（fixtures 由 tests/gen-fixtures.mjs 生成，可重新生成）
+tests/fixtures/
